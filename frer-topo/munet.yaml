@@ -1,0 +1,90 @@
+version: 1
+topology:
+  networks:
+  - name: link-h1
+  - name: net1A
+  - name: net1B
+  - name: net1C
+  - name: net2A
+  - name: net2B
+  - name: net2C
+  - name: link-h2
+
+  nodes:
+  - name: h1
+    kind: host
+    cmd: |
+      ip link set eth0 up
+      ip addr add 10.0.0.1/24 dev eth0
+      ethtool -K eth0 rxvlan off txvlan off tx off rx off || true
+      sysctl -w net.ipv4.conf.eth0.accept_local=1
+      bash
+    connections:
+    - to: link-h1
+
+  - name: bridgeA
+    kind: edge
+    connections:
+    - to: link-h1
+    - to: net1A
+    - to: net2A
+
+  - name: bridge1A
+    kind: bridge
+    connections:
+    - to: net1A
+    - to: net1B
+
+  - name: bridge1B
+    kind: bridge
+    connections:
+    - to: net1B
+    - to: net1C
+
+  - name: bridge2A
+    kind: bridge
+    connections:
+    - to: net2A
+    - to: net2B
+
+  - name: bridge2B
+    kind: bridge
+    connections:
+    - to: net2B
+    - to: net2C
+
+  - name: bridgeB
+    kind: edge
+    connections:
+    - to: link-h2
+    - to: net1C
+    - to: net2C
+
+  - name: h2
+    kind: host
+    cmd: |
+      ip link set eth0 up
+      ip addr add 10.0.0.2/24 dev eth0
+      ethtool -K eth0 rxvlan off txvlan off tx off rx off || true
+      sysctl -w net.ipv4.conf.eth0.accept_local=1
+      bash
+    connections:
+    - to: link-h2
+
+kinds:
+- name: host
+  cmd: bash
+- name: bridge
+  cmd: |
+    ip link add name br0 type bridge
+    ip link set br0 up
+    ip link set eth0 master br0
+    ip link set eth1 master br0
+    ip link set eth0 up
+    ip link set eth1 up
+- name: edge
+  cmd: |
+    ip link set eth0 up
+    ip link set eth1 up
+    ip link set eth2 up
+    /home/francis/lab/dnt-venv/bin/dnt /home/francis/lab/frer-topo/dnt.ini

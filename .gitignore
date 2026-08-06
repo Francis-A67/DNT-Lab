@@ -1,0 +1,16 @@
+# third-party clones, not our work
+dnt-venv/
+xdpfrer/
+munet/
+frr/
+
+# captures
+*.pcap
+*.pcapng
+
+# backups and runtime junk
+*.bak
+*.log
+*.pid
+__pycache__/
+*.pyc
