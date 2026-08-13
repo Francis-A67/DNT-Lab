@@ -11,3 +11,6 @@ frr/
 *.pid
 __pycache__/
 *.pyc
+
+# Python virtualenvs
+*-venv/
